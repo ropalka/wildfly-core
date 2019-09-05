@@ -566,6 +566,7 @@ public abstract class AbstractControllerService implements Service<ModelControll
         capabilityRegistry.publish();
         ServiceNameFactory.clearCache();
         controller = null;
+        stabilityMonitor.clear();
         stabilityMonitor = null;
         processState.setStopping();
         Runnable r = new Runnable() {

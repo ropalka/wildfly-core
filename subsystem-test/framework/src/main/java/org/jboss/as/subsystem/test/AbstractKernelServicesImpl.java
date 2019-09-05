@@ -31,6 +31,7 @@ import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceContainer;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.ServiceTarget;
+import org.jboss.msc.service.StabilityMonitor;
 import org.jboss.msc.service.ValueService;
 import org.jboss.msc.value.ImmediateValue;
 import org.jboss.threads.EnhancedQueueExecutor;
@@ -77,6 +78,8 @@ public abstract class AbstractKernelServicesImpl extends ModelTestKernelServices
         //Initialize the controller
         ServiceContainer container = ServiceContainer.Factory.create("subsystem-test" + (legacyModelVersion != null ? "-legacy-" : "-") + counter.incrementAndGet());
         ServiceTarget target = container.subTarget();
+        StabilityMonitor sm = new StabilityMonitor();
+        target.addMonitor(sm);
         List<ModelNode> extraOps = controllerInitializer.initializeBootOperations();
         List<ModelNode> allOps = new ArrayList<ModelNode>();
         if (extraOps != null) {
@@ -126,6 +129,11 @@ public abstract class AbstractKernelServicesImpl extends ModelTestKernelServices
         }
 
         additionalInit.addExtraServices(target);
+        try {
+            sm.awaitStability();
+        } finally {
+            sm.clear();
+        }
 
         //sharedState = svc.state;
         svc.waitForSetup();

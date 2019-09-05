@@ -51,6 +51,7 @@ import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceContainer;
 import org.jboss.msc.service.ServiceTarget;
+import org.jboss.msc.service.StabilityMonitor;
 import org.jboss.msc.service.ValueService;
 import org.jboss.msc.value.ImmediateValue;
 import org.jboss.msc.value.InjectedValue;
@@ -79,6 +80,8 @@ public abstract class AbstractKernelServicesImpl extends ModelTestKernelServices
         //Create the controller
         ServiceContainer container = ServiceContainer.Factory.create("core-test" + counter.incrementAndGet());
         ServiceTarget target = container.subTarget();
+        StabilityMonitor sm = new StabilityMonitor();
+        target.addMonitor(sm);
 
         //Initialize the content repository
         File repositoryFile = new File("target/deployment-repository");
@@ -124,6 +127,11 @@ public abstract class AbstractKernelServicesImpl extends ModelTestKernelServices
             target.addService(AbstractControllerService.EXECUTOR_CAPABILITY.getCapabilityServiceName(), mgmtExecSvc).install();
         }
 
+        try {
+            sm.awaitStability();
+        } finally {
+            sm.clear();
+        }
         //sharedState = svc.state;
         svc.waitForSetup();
         //processState.setRunning();

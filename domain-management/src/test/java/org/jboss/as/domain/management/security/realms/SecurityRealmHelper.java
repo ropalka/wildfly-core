@@ -57,14 +57,13 @@ final class SecurityRealmHelper {
         } catch (Throwable t) {
             // ignored
         } finally {
-            sm.clear();
             ctrl.setMode(ServiceController.Mode.REMOVE);
             try {
                 sm.awaitStability();
             } catch (Throwable t) {
                 // ignored
             } finally {
-                sm.removeController(ctrl);
+                sm.clear();
             }
         }
         return retVal;

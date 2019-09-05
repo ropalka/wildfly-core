@@ -140,7 +140,7 @@ public abstract class AbstractDeploymentUnitService implements Service<Deploymen
             deploymentUnit.removeAttachment(key);
         }
         deploymentUnit = null;
-        monitor.removeController(context.getController());
+        monitor.clear();
         monitor = null;
         DeploymentResourceSupport.cleanup(resource);
     }

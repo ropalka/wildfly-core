@@ -66,7 +66,6 @@ import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.remoting3.Endpoint;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.wildfly.extension.io.IOServices;
 import org.wildfly.extension.io.WorkerService;
@@ -170,7 +169,6 @@ public class RemotingSubsystemTestCase extends AbstractSubsystemBaseTest {
      * WFCORE-3327. Use the management API to add the subsystem, with the endpoint configuration done via
      * the deprecated /subsystem=remoting/configuration=endpoint resource.
      */
-    @Ignore("WFCORE-4518")
     @Test
     public void testEndpointConfigurationViaDeprecatedChild() throws Exception {
         KernelServices services = createKernelServicesBuilder(createRuntimeAdditionalInitialization())
@@ -247,7 +245,6 @@ public class RemotingSubsystemTestCase extends AbstractSubsystemBaseTest {
      * WFCORE-3327. Use the management API to add the subsystem, with the endpoint configuration done via
      * the root /subsystem=remoting resource.
      */
-    @Ignore("WFCORE-4604")
     @Test
     public void testEndpointConfigurationViaSubsystemRoot() throws Exception {
         KernelServices services = createKernelServicesBuilder(createRuntimeAdditionalInitialization())
