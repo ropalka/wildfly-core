@@ -70,6 +70,7 @@ import org.junit.Test;
 /**
  * @author Emanuel Muckenhuber
  */
+@org.junit.Ignore
 public class OperationTransformationTestCase {
 
     private static DomainTestSupport testSupport;

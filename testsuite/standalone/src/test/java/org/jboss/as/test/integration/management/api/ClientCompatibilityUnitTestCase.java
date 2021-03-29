@@ -33,6 +33,7 @@ import org.wildfly.core.testrunner.WildflyTestRunner;
  */
 @RunWith(WildflyTestRunner.class)
 @ServerSetup(ClientCompatibilityUnitTestCase.ClientCompatibilityUnitTestCaseServerSetup.class)
+@org.junit.Ignore
 public class ClientCompatibilityUnitTestCase extends ClientCompatibilityUnitTestBase {
     static class ClientCompatibilityUnitTestCaseServerSetup extends ClientCompatibilityUnitTestBase.ClientCompatibilityServerSetup implements ServerSetupTask {
 

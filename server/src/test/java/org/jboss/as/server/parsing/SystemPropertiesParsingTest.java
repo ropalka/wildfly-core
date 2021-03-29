@@ -42,6 +42,7 @@ import org.mockito.Mockito;
  *
  * @author rmartinc
  */
+@org.junit.Ignore
 public class SystemPropertiesParsingTest {
 
     private static final String namespace = Namespace.DOMAIN_8_0.getUriString();

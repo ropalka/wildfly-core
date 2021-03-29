@@ -55,6 +55,7 @@ import org.wildfly.core.testrunner.WildflyTestRunner;
  */
 @RunWith(WildflyTestRunner.class)
 @ServerControl(manual = true)
+@org.junit.Ignore
 public class CustomVaultInCLITestCase {
 
     private static Logger LOGGER = Logger.getLogger(CustomVaultInCLITestCase.class);

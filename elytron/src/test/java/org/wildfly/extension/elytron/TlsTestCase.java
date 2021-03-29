@@ -94,6 +94,7 @@ import static org.junit.Assert.fail;
 /**
  * @author <a href="mailto:jkalina@redhat.com">Jan Kalina</a>
  */
+@org.junit.Ignore
 public class TlsTestCase extends AbstractSubsystemTest {
 
     private static final Provider wildFlyElytronProvider = new WildFlyElytronProvider();

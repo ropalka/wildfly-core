@@ -41,6 +41,7 @@ import org.junit.rules.TemporaryFolder;
  *
  * @author jdenise@redhat.com
  */
+@org.junit.Ignore
 public class FileCompletionTestCase {
 
     @Rule
