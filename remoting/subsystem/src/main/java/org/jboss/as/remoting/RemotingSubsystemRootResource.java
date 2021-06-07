@@ -23,6 +23,7 @@ package org.jboss.as.remoting;
 
 import static org.jboss.as.remoting.Capabilities.HTTP_LISTENER_REGISTRY_CAPABILITY_NAME;
 import static org.jboss.as.remoting.Capabilities.IO_WORKER_CAPABILITY_NAME;
+import static org.jboss.as.remoting.Capabilities.REMOTING_CAPABILITY_NAME;
 import static org.jboss.as.remoting.Capabilities.REMOTING_ENDPOINT_CAPABILITY_NAME;
 
 import java.util.logging.Level;
@@ -65,6 +66,8 @@ import io.undertow.server.ListenerRegistry;
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  */
 public class RemotingSubsystemRootResource extends SimpleResourceDefinition {
+
+    public static final RuntimeCapability<Void> REMOTING_CAPABILITY = RuntimeCapability.Builder.of(REMOTING_CAPABILITY_NAME).build();
 
     static final RuntimeCapability<Void> REMOTING_ENDPOINT_CAPABILITY =
             RuntimeCapability.Builder.of(REMOTING_ENDPOINT_CAPABILITY_NAME, Endpoint.class).build();

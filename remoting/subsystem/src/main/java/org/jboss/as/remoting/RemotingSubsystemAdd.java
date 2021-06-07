@@ -24,8 +24,10 @@ package org.jboss.as.remoting;
 
 
 import static org.jboss.as.remoting.Capabilities.IO_WORKER_CAPABILITY_NAME;
+import static org.jboss.as.remoting.RemotingSubsystemRootResource.REMOTING_CAPABILITY;
 import static org.jboss.as.remoting.RemotingSubsystemRootResource.REMOTING_ENDPOINT_CAPABILITY;
 import static org.jboss.as.remoting.RemotingSubsystemRootResource.WORKER;
+import static org.jboss.as.remoting.RemotingServices.REMOTING_OPTIONS;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -37,6 +39,7 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.ProcessType;
 import org.jboss.as.controller.registry.Resource;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.remoting3.Endpoint;
 import org.wildfly.security.manager.WildFlySecurityManager;
@@ -61,20 +64,23 @@ class RemotingSubsystemAdd extends AbstractAddStepHandler {
     @Override
     protected void populateModel(OperationContext context, ModelNode operation, Resource resource) throws OperationFailedException {
         super.populateModel(context, operation, resource);
-
+        context.registerCapability(REMOTING_CAPABILITY);
         // Add a step to set up a placeholder endpoint resource if needed
         context.addStep(new WorkerThreadPoolVsEndpointHandler(forDomain), OperationContext.Stage.MODEL);
     }
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, Resource resource) throws OperationFailedException {
-
         // WFCORE-4510 -- the effective endpoint configuration is from the root subsystem resource,
         // not from the placeholder configuration=endpoint child resource.
         ModelNode endpointModel = resource.getModel();
         String workerName = WORKER.resolveModelAttribute(context, endpointModel).asString();
 
         final OptionMap map = EndpointConfigFactory.populate(context, endpointModel);
+        final ServiceBuilder<?> optsBuilder = context.getServiceTarget().addService(REMOTING_OPTIONS);
+        final Consumer<OptionMap> optsConsumer = optsBuilder.provides(REMOTING_OPTIONS);
+        optsBuilder.setInstance(org.jboss.msc.Service.newInstance(optsConsumer, map));
+        optsBuilder.install();
 
         // create endpoint
         final String nodeName = WildFlySecurityManager.getPropertyPrivileged(RemotingExtension.NODE_NAME_PROPERTY, null);

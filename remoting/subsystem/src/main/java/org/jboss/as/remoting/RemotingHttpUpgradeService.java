@@ -33,6 +33,7 @@ import io.undertow.server.ListenerRegistry;
 import io.undertow.server.handlers.ChannelUpgradeHandler;
 
 import org.jboss.as.controller.OperationContext;
+import org.jboss.as.controller.capability.CapabilityServiceSupport;
 import org.jboss.as.domain.management.security.SecurityRealmService;
 import org.jboss.as.network.SocketBinding;
 import org.jboss.as.remoting.logging.RemotingLogger;
@@ -96,6 +97,7 @@ public class RemotingHttpUpgradeService implements Service {
     private final Supplier<ChannelUpgradeHandler> upgradeRegistrySupplier;
     private final Supplier<ListenerRegistry> listenerRegistrySupplier;
     private final Supplier<Endpoint> endpointSupplier;
+    private final Supplier<OptionMap> endpointOptionsSupplier;
     private final Supplier<org.jboss.as.domain.management.SecurityRealm> securityRealmSupplier;
     private final Supplier<SaslAuthenticationFactory> saslAuthenticationFactorySupplier;
     private final OptionMap connectorPropertiesOptionMap;
@@ -106,6 +108,7 @@ public class RemotingHttpUpgradeService implements Service {
                                       final Supplier<ChannelUpgradeHandler> upgradeRegistrySupplier,
                                       final Supplier<ListenerRegistry> listenerRegistrySupplier,
                                       final Supplier<Endpoint> endpointSupplier,
+                                      final Supplier<OptionMap> endpointOptionsSupplier,
                                       final Supplier<org.jboss.as.domain.management.SecurityRealm> securityRealmSupplier,
                                       final Supplier<SaslAuthenticationFactory> saslAuthenticationFactorySupplier,
                                       final String httpConnectorName, final String endpointName, final OptionMap connectorPropertiesOptionMap) {
@@ -113,6 +116,7 @@ public class RemotingHttpUpgradeService implements Service {
         this.upgradeRegistrySupplier = upgradeRegistrySupplier;
         this.listenerRegistrySupplier = listenerRegistrySupplier;
         this.endpointSupplier = endpointSupplier;
+        this.endpointOptionsSupplier = endpointOptionsSupplier;
         this.securityRealmSupplier = securityRealmSupplier;
         this.saslAuthenticationFactorySupplier = saslAuthenticationFactorySupplier;
         this.httpConnectorName = httpConnectorName;
@@ -133,7 +137,10 @@ public class RemotingHttpUpgradeService implements Service {
         final Supplier<Endpoint> eSupplier = sb.requires(endpointName);
         final Supplier<org.jboss.as.domain.management.SecurityRealm> srSupplier = securityRealm != null ? sb.requires(org.jboss.as.domain.management.SecurityRealm.ServiceUtil.createServiceName(securityRealm)) : null;
         final Supplier<SaslAuthenticationFactory> safSupplier = saslAuthenticationFactory != null ? sb.requires(context.getCapabilityServiceName(SASL_AUTHENTICATION_FACTORY_CAPABILITY, saslAuthenticationFactory, SaslAuthenticationFactory.class)) : null;
-        sb.setInstance(new RemotingHttpUpgradeService(serviceConsumer, urSupplier, lrSupplier, eSupplier, srSupplier, safSupplier, httpConnectorName, endpointName.getSimpleName(), connectorPropertiesOptionMap));
+        final CapabilityServiceSupport capabilitySupport = context.getCapabilityServiceSupport();
+        final boolean remotingSubsystemAvailable = capabilitySupport.hasCapability("org.wildfly.remoting");
+        final Supplier<OptionMap> endpointOptionsSupplier = remotingSubsystemAvailable ? sb.requires(RemotingServices.REMOTING_OPTIONS) : null;
+        sb.setInstance(new RemotingHttpUpgradeService(serviceConsumer, urSupplier, lrSupplier, eSupplier, endpointOptionsSupplier, srSupplier, safSupplier, httpConnectorName, endpointName.getSimpleName(), connectorPropertiesOptionMap));
         sb.setInitialMode(ServiceController.Mode.ACTIVE);
         sb.install();
     }
@@ -151,6 +158,9 @@ public class RemotingHttpUpgradeService implements Service {
 
         if (connectorPropertiesOptionMap != null) {
             builder.addAll(connectorPropertiesOptionMap);
+        }
+        if (endpointOptionsSupplier != null) {
+            builder.addAll(endpointOptionsSupplier.get());
         }
         OptionMap resultingMap = builder.getMap();
         try {

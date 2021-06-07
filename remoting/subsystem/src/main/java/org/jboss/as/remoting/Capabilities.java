@@ -28,7 +28,14 @@ package org.jboss.as.remoting;
  * @author <a href="mailto:darran.lofthouse@jboss.com">Darran Lofthouse</a>
  */
 final class Capabilities {
+
+    private Capabilities() {
+        // forbidden instantiation
+    }
+
     static final String HTTP_LISTENER_REGISTRY_CAPABILITY_NAME = "org.wildfly.remoting.http-listener-registry";
+
+    static final String REMOTING_CAPABILITY_NAME = "org.wildfly.remoting";
 
     static final String REMOTING_ENDPOINT_CAPABILITY_NAME = "org.wildfly.remoting.endpoint";
 
