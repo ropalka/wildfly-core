@@ -45,6 +45,7 @@ import org.jboss.as.server.moduleservice.ModuleLoadService;
 import org.jboss.as.server.moduleservice.ModuleResolvePhaseService;
 import org.jboss.as.server.moduleservice.ServiceModuleLoader;
 import org.jboss.modules.DependencySpec;
+import org.jboss.modules.ModuleDependencySpecBuilder;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
 import org.jboss.modules.ModuleSpec;
@@ -350,8 +351,13 @@ public class ModuleSpecProcessor implements DeploymentUnitProcessor {
                     }
                     exportFilter = exportBuilder.create();
                 }
-                final DependencySpec depSpec = DependencySpec.createModuleDependencySpec(importFilter, exportFilter, dependency
-                        .getModuleLoader(), dependency.getIdentifier(), dependency.isOptional());
+                final DependencySpec depSpec = new ModuleDependencySpecBuilder()
+                    .setImportFilter(importFilter)
+                    .setExportFilter(exportFilter)
+                    .setModuleLoader(dependency.getModuleLoader())
+                    .setName(dependency.getIdentifier().toString())
+                    .setOptional(dependency.isOptional())
+                    .build();
                 specBuilder.addDependency(depSpec);
                 logger.debugf("Adding dependency %s to module %s", dependency, specBuilder.getIdentifier());
             }
