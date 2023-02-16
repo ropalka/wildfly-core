@@ -28,28 +28,27 @@ import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 
 /**
- * DUP thats adds dependencies that are available to all deployments
+ * DUP that adds dependencies that are available to all deployments
  *
  * @author Stuart Douglas
  * @author Thomas.Diesler@jboss.com
  */
 public class ServerDependenciesProcessor implements DeploymentUnitProcessor {
 
-    private static ModuleIdentifier[] DEFAULT_MODULES = new ModuleIdentifier[] {
-        ModuleIdentifier.create("java.se"),
-        ModuleIdentifier.create("org.jboss.vfs"),
+    private static String[] DEFAULT_MODULES = new String[] {
+            "java.se",
+            "org.jboss.vfs",
     };
 
-    private static ModuleIdentifier[] DEFAULT_MODULES_WITH_SERVICE_IMPORTS = new ModuleIdentifier[] {
+    private static String[] DEFAULT_MODULES_WITH_SERVICE_IMPORTS = new String[] {
             // The Sun JDK is added as a dependency with service import = true since it's required for JSR-223 Javascript engine to be available.
             // @see https://issues.jboss.org/browse/AS7-1116 and https://issues.jboss.org/browse/WFLY-1373
-            ModuleIdentifier.create("sun.jdk"),
-            ModuleIdentifier.create("ibm.jdk"),
+            "sun.jdk",
+            "ibm.jdk",
     };
 
     @Override
@@ -58,7 +57,7 @@ public class ServerDependenciesProcessor implements DeploymentUnitProcessor {
         final ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
         final ModuleLoader moduleLoader = Module.getBootModuleLoader();
         // add module dependency (these do not require services to be imported)
-        for (ModuleIdentifier moduleId : DEFAULT_MODULES) {
+        for (String moduleId : DEFAULT_MODULES) {
             try {
                 moduleLoader.loadModule(moduleId);
                 moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, moduleId, false, false, false, false));
@@ -67,7 +66,7 @@ public class ServerDependenciesProcessor implements DeploymentUnitProcessor {
             }
         }
         // add module dependency with importServices = true
-        for (ModuleIdentifier moduleId : DEFAULT_MODULES_WITH_SERVICE_IMPORTS) {
+        for (String moduleId : DEFAULT_MODULES_WITH_SERVICE_IMPORTS) {
             try {
                 moduleLoader.loadModule(moduleId);
                 moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, moduleId, false, false, true, false));

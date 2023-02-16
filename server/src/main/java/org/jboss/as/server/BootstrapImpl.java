@@ -39,7 +39,6 @@ import org.jboss.as.server.logging.ServerLogger;
 import org.jboss.as.server.suspend.OperationListener;
 import org.jboss.as.server.suspend.SuspendController;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 import org.jboss.msc.service.LifecycleEvent;
@@ -107,7 +106,7 @@ final class BootstrapImpl implements Bootstrap {
         assert configurationPersisterFactory != null : "configurationPersisterFactory is null";
 
         try {
-            Module.registerURLStreamHandlerFactoryModule(moduleLoader.loadModule(ModuleIdentifier.create("org.jboss.vfs")));
+            Module.registerURLStreamHandlerFactoryModule(moduleLoader.loadModule("org.jboss.vfs"));
         } catch (ModuleLoadException e) {
             throw ServerLogger.ROOT_LOGGER.vfsNotAvailable();
         }

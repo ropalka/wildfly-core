@@ -31,7 +31,6 @@ import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
 import org.jboss.as.server.deployment.module.ResourceRoot;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.msc.service.ServiceActivator;
 
 /**
@@ -41,7 +40,7 @@ import org.jboss.msc.service.ServiceActivator;
  */
 public class ServiceActivatorDependencyProcessor implements DeploymentUnitProcessor {
 
-    private static final ModuleDependency MSC_DEP = new ModuleDependency(Module.getBootModuleLoader(), ModuleIdentifier.create("org.jboss.msc"), false, false, false, false);
+    private static final ModuleDependency MSC_DEP = new ModuleDependency(Module.getBootModuleLoader(), "org.jboss.msc", false, false, false, false);
 
     /**
      * Add the dependencies if the deployment contains a service activator loader entry.
