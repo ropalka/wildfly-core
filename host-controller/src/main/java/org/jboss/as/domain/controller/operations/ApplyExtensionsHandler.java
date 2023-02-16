@@ -62,7 +62,6 @@ import org.jboss.as.host.controller.ignored.IgnoredDomainResourceRegistry;
 import org.jboss.as.server.operations.ServerProcessStateHandler;
 import org.jboss.dmr.ModelNode;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 
 /**
@@ -211,7 +210,7 @@ public class ApplyExtensionsHandler implements OperationStepHandler {
 
     protected void initializeExtension(String module, ManagementResourceRegistration rootRegistration) throws OperationFailedException {
         try {
-            for (final Extension extension : Module.loadServiceFromCallerModuleLoader(ModuleIdentifier.fromString(module), Extension.class)) {
+            for (final Extension extension : Module.loadServiceFromCallerModuleLoader(module, Extension.class)) {
                 ClassLoader oldTccl = SecurityActions.setThreadContextClassLoader(extension.getClass());
                 try {
                     extension.initializeParsers(extensionRegistry.getExtensionParsingContext(module, null));

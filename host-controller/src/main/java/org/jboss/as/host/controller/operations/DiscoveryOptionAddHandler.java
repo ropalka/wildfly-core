@@ -36,7 +36,6 @@ import org.jboss.as.host.controller.discovery.DiscoveryOptionResourceDefinition;
 import org.jboss.as.host.controller.logging.HostControllerLogger;
 import org.jboss.dmr.ModelNode;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 
 /**
  * Handler for the discovery option resource's add operation.
@@ -92,9 +91,7 @@ public class DiscoveryOptionAddHandler extends AbstractDiscoveryOptionAddHandler
         }
 
         try {
-            ModuleIdentifier moduleID = moduleName != null
-                    ? ModuleIdentifier.fromString(moduleName)
-                    : Module.forClass(getClass()).getIdentifier();
+            String moduleID = moduleName != null ? moduleName : Module.forClass(getClass()).getName();
             final Class<? extends DiscoveryOption> discoveryOptionClass = Module.loadClassFromCallerModuleLoader(moduleID, discoveryOptionClassName)
                     .asSubclass(DiscoveryOption.class);
             final Constructor<? extends DiscoveryOption> constructor = discoveryOptionClass.getConstructor(Map.class);
