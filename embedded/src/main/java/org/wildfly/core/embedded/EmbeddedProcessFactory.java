@@ -29,7 +29,6 @@ import java.util.Properties;
 
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleClassLoader;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 import org.wildfly.core.embedded.logging.EmbeddedLogger;
@@ -299,10 +298,9 @@ public class EmbeddedProcessFactory {
     }
 
     private static void setupVfsModule(final ModuleLoader moduleLoader) {
-        final ModuleIdentifier vfsModuleID = ModuleIdentifier.create(MODULE_ID_VFS);
         final Module vfsModule;
         try {
-            vfsModule = moduleLoader.loadModule(vfsModuleID);
+            vfsModule = moduleLoader.loadModule(MODULE_ID_VFS);
         } catch (final ModuleLoadException mle) {
             throw EmbeddedLogger.ROOT_LOGGER.moduleLoaderError(mle,MODULE_ID_VFS, moduleLoader);
         }
