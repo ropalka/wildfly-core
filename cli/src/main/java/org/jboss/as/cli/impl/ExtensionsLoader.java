@@ -46,7 +46,6 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.modules.ModuleClassLoader;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 
@@ -167,7 +166,7 @@ class ExtensionsLoader {
             if(!module.isDefined()) {
                 addError("Extension " + ext.getName() + " is missing module attribute");
             } else {
-                final ModuleIdentifier moduleId = ModuleIdentifier.fromString(module.asString());
+                final String moduleId = module.asString();
                 ModuleClassLoader cl;
                 try {
                     cl = moduleLoader.loadModule(moduleId).getClassLoader();
