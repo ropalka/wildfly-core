@@ -22,7 +22,6 @@ import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.StringListAttributeDefinition;
 import org.jboss.dmr.ModelType;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 
 /**
@@ -56,8 +55,7 @@ class ClassLoadingAttributeDefinitions {
     static ClassLoader resolveClassLoader(String module) throws ModuleLoadException {
         Module current = Module.getCallerModule();
         if (module != null && current != null) {
-            ModuleIdentifier mi = ModuleIdentifier.fromString(module);
-            current = current.getModule(mi);
+            current = current.getModule(module);
         }
 
         return current != null ? current.getClassLoader() : ClassLoadingAttributeDefinitions.class.getClassLoader();

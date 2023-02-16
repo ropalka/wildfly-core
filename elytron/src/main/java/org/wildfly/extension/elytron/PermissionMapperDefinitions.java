@@ -54,7 +54,6 @@ import org.jboss.as.controller.operations.validation.EnumValidator;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceName;
@@ -417,9 +416,8 @@ class PermissionMapperDefinitions {
     private static java.security.Permission createPermission(Permission permission) throws StartException {
         Module currentModule = Module.getCallerModule();
         if (permission.getModule() != null && currentModule != null) {
-            ModuleIdentifier mi = ModuleIdentifier.fromString(permission.getModule());
             try {
-                currentModule = currentModule.getModule(mi);
+                currentModule = currentModule.getModule(permission.getModule());
             } catch (ModuleLoadException e) {
                 // If we cannot load it, it can never be checked.
                 throw ElytronSubsystemMessages.ROOT_LOGGER.invalidPermissionModule(permission.getModule(), e);

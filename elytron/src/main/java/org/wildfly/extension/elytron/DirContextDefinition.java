@@ -53,7 +53,6 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.dmr.Property;
 import org.jboss.modules.Module;
-import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -174,9 +173,7 @@ class DirContextDefinition extends SimpleResourceDefinition {
         if(moduleName != null && !"".equals(moduleName)){
             try {
                 Module cm = Module.getCallerModule();
-                ModuleIdentifier mi = ModuleIdentifier.create(moduleName);
-                //module = Module.getCallerModule().getModule(ModuleIdentifier.create(moduleName));
-                module = cm.getModule(mi);
+                module = cm.getModule(moduleName);
             } catch (ModuleLoadException e) {
                 throw ElytronSubsystemMessages.ROOT_LOGGER.unableToLoadModule(moduleName, e);
             }
