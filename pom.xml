@@ -2441,5 +2441,28 @@
                 <defaultGoal>clean install</defaultGoal>
             </build>
         </profile>
+
+        <profile>
+            <id>enable-annotation-processing</id>
+            <activation>
+                <jdk>[23,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-Xlint:unchecked</arg>
+                                <arg>-proc:full</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
+
 </project>
