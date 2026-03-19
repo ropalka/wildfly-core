@@ -32,14 +32,17 @@ import org.wildfly.common.xml.XMLInputFactoryUtil;
  * @author Tomaz Cerar (c) 2014 Red Hat Inc.
  */
 final class MavenSettings {
+    static final String MAVEN_SETTINGS_PATH_PROPERTY = "org.wildfly.core.model-test.maven.settings.xml.path";
+
     private static final Object settingLoaderMutex = new Object();
 
     private static volatile MavenSettings mavenSettings;
 
     private Path localRepository = null;
-    private final List<String> remoteRepositories = new LinkedList<>();
+    private final List<Repository> remoteRepositories = new LinkedList<>();
     private final Map<String, Profile> profiles = new HashMap<>();
     private final List<String> activeProfileNames = new LinkedList<>();
+    private final Map<String, Server> servers = new HashMap<>();
 
     MavenSettings() {
         configureDefaults();
@@ -58,7 +61,13 @@ final class MavenSettings {
                 MavenSettings settings = new MavenSettings();
 
                 Path m2 = Paths.get(System.getProperty("user.home"), ".m2");
-                Path settingsPath = m2.resolve("settings.xml");
+                Path settingsPath;
+                String settingsPathProperty = System.getProperty(MAVEN_SETTINGS_PATH_PROPERTY);
+                if (settingsPathProperty == null || settingsPathProperty.isEmpty()) {
+                    settingsPath = m2.resolve("settings.xml");
+                } else {
+                    settingsPath = Path.of(settingsPathProperty);
+                }
 
                 if (Files.notExists(settingsPath)) {
                     String mavenHome = System.getenv("M2_HOME");
@@ -171,6 +180,20 @@ final class MavenSettings {
                             }
                             break;
                         }
+                        case "servers":
+                            while ((eventType = reader.nextTag()) != END_DOCUMENT) {
+                                if (eventType == START_ELEMENT) {
+                                    switch (reader.getLocalName()) {
+                                        case "server": {
+                                            parseServer(reader, mavenSettings);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            break;
                         default: {
                             skip(reader);
                         }
@@ -188,6 +211,7 @@ final class MavenSettings {
     private static void parseProfile(final XMLStreamReader reader, MavenSettings mavenSettings) throws XMLStreamException, IOException {
         int eventType;
         Profile profile = new Profile();
+        boolean activeByDefault = false;
         while ((eventType = reader.nextTag()) != END_DOCUMENT) {
             if (eventType == START_ELEMENT) {
                 switch (reader.getLocalName()) {
@@ -211,6 +235,21 @@ final class MavenSettings {
                         }
                         break;
                     }
+                    case "activation":
+                        while ((eventType = reader.nextTag()) != END_DOCUMENT) {
+                            if (eventType == START_ELEMENT) {
+                                switch (reader.getLocalName()) {
+                                    case "activeByDefault": {
+                                        activeByDefault = Boolean.parseBoolean(reader.getElementText());
+                                        break;
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
+
+                        }
+                        break;
                     default: {
                         skip(reader);
                     }
@@ -220,15 +259,27 @@ final class MavenSettings {
             }
         }
         mavenSettings.addProfile(profile);
+        if (activeByDefault) {
+            mavenSettings.addActiveProfile(profile.getId());
+        }
     }
 
     private static void parseRepository(final XMLStreamReader reader, Profile profile) throws XMLStreamException, IOException {
         int eventType;
+        Repository repository = new Repository();
         while ((eventType = reader.nextTag()) != END_DOCUMENT) {
             if (eventType == START_ELEMENT) {
                 switch (reader.getLocalName()) {
+                    case "id": {
+                        repository.setId(reader.getElementText());
+                        break;
+                    }
                     case "url": {
-                        profile.addRepository(reader.getElementText());
+                        String url = reader.getElementText();
+                        if (!url.endsWith("/")) {
+                            url += "/";
+                        }
+                        repository.setUrl(url);
                         break;
                     }
                     default: {
@@ -238,8 +289,37 @@ final class MavenSettings {
             } else {
                 break;
             }
-
         }
+        profile.addRepository(repository);
+    }
+
+    private static void parseServer(final XMLStreamReader reader, MavenSettings mavenSettings) throws XMLStreamException, IOException {
+        int eventType;
+        Server server = new Server();
+        while ((eventType = reader.nextTag()) != END_DOCUMENT) {
+            if (eventType == START_ELEMENT) {
+                switch (reader.getLocalName()) {
+                    case "id": {
+                        server.setId(reader.getElementText());
+                        break;
+                    }
+                    case "username": {
+                        server.setUsername(reader.getElementText());
+                        break;
+                    }
+                    case "password": {
+                        server.setPassword(reader.getElementText());
+                        break;
+                    }
+                    default: {
+                        skip(reader);
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        mavenSettings.addServer(server);
     }
 
     private static void skip(XMLStreamReader parser) throws XMLStreamException, IOException {
@@ -261,7 +341,7 @@ final class MavenSettings {
 
     private void configureDefaults() {
         //always add maven central
-        remoteRepositories.add("https://repo1.maven.org/maven2/");
+        remoteRepositories.add(new Repository("central", "https://repo1.maven.org/maven2/"));
         String localRepositoryPath = System.getProperty("localRepository");
         if (localRepositoryPath != null && !localRepositoryPath.trim().isEmpty()) {
             localRepository = Paths.get(localRepositoryPath);
@@ -272,11 +352,12 @@ final class MavenSettings {
         }
         String remoteRepository = System.getProperty("remote.maven.repo");
         if (remoteRepository != null) {
+            int i = 0;
             for (String repo : remoteRepository.split(",")) {
                 if (!repo.endsWith("/")) {
                     repo += "/";
                 }
-                remoteRepositories.add(repo);
+                remoteRepositories.add(new Repository("repo-" + (++i), repo));
             }
         }
     }
@@ -289,7 +370,7 @@ final class MavenSettings {
         return localRepository;
     }
 
-    List<String> getRemoteRepositories() {
+    List<Repository> getRemoteRepositories() {
         return remoteRepositories;
     }
 
@@ -297,11 +378,19 @@ final class MavenSettings {
         this.profiles.put(profile.getId(), profile);
     }
 
+    private void addServer(Server server) {
+        this.servers.put(server.getId(), server);
+    }
+
+    Map<String, Server> getServers() {
+        return servers;
+    }
+
     private void addActiveProfile(String profileName) {
         activeProfileNames.add(profileName);
     }
 
-    private void resolveActiveSettings() {
+    void resolveActiveSettings() {
         for (String name : activeProfileNames) {
             Profile p = profiles.get(name);
             if (p != null) {
@@ -313,7 +402,7 @@ final class MavenSettings {
 
     static final class Profile {
         private String id;
-        final List<String> repositories = new LinkedList<>();
+        final List<Repository> repositories = new LinkedList<>();
 
         Profile() {
 
@@ -327,15 +416,71 @@ final class MavenSettings {
             return id;
         }
 
-        void addRepository(String url) {
-            if (!url.endsWith("/")) {
-                url += "/";
-            }
-            repositories.add(url);
+        void addRepository(Repository repository) {
+            repositories.add(repository);
         }
 
-        List<String> getRepositories() {
+        List<Repository> getRepositories() {
             return repositories;
+        }
+    }
+
+    static final class Repository {
+        private String id;
+        private String url;
+
+        public Repository() {
+        }
+
+        public Repository(String id, String url) {
+            this.id = id;
+            this.url = url;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
+
+    static final class Server {
+        private String id;
+        private String username;
+        private String password;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 }
