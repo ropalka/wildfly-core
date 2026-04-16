@@ -34,6 +34,7 @@ import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.Operation;
 import org.jboss.as.test.integration.management.util.MgmtOperationException;
+import org.jboss.as.test.shared.TimeoutUtil;
 import org.jboss.dmr.ModelNode;
 import org.junit.Assert;
 
@@ -42,8 +43,8 @@ import org.junit.Assert;
  */
 public class DomainTestUtils {
 
-    private static final int DEFAULT_TIMEOUT = 60;
-    private static final int SLEEP_TIME_MILLIS = 100;
+    private static final int DEFAULT_TIMEOUT = TimeoutUtil.adjust(60);
+    private static final int SLEEP_TIME_MILLIS = TimeoutUtil.adjust(100);
 
     private DomainTestUtils() {
         //
@@ -234,6 +235,18 @@ public class DomainTestUtils {
     }
 
     /**
+     * Wait until a server reached a given state or fail if the timeout was reached.
+     *
+     * @param client        the controller client
+     * @param serverAddress the server address
+     * @param state         the required state
+     * @throws IOException if an I/O error occurs while executing the operation
+     */
+    public static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String state, int timeout, TimeUnit timeoutUnit) throws IOException {
+        waitUntilState(client, serverAddress, state, timeout, timeoutUnit, "status");
+    }
+
+    /**
      * Wait until a server reached a given suspend state or fail if the timeout was reached.
      *
      * @param client        the controller client
@@ -342,7 +355,7 @@ public class DomainTestUtils {
      * @param unit          the time unit
      * @throws IOException if an I/O error occurs while executing the operation
      */
-    private static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String required, final long timeout, final TimeUnit unit, final String attrName) throws IOException {
+    public static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String required, final long timeout, final TimeUnit unit, final String attrName) throws IOException {
         final long deadline = System.currentTimeMillis() + unit.toMillis(timeout);
         for (; ; ) {
             final long remaining = deadline - System.currentTimeMillis();
@@ -356,7 +369,7 @@ public class DomainTestUtils {
                 TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MILLIS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
+                break;
             }
         }
         final String state = getState(client, serverAddress, attrName);
