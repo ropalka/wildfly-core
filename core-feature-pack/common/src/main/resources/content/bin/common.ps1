@@ -266,10 +266,10 @@ Param(
 
         & $JAVA -Xverbosegclog:"$JBOSS_LOG_DIR\gc.log" -version >$null 2>&1
         if ($LastExitCode -eq 0){
-            $PROG_ARGS += "-Xverbosegclog:`\`"$JBOSS_LOG_DIR\gc.log`\`""
+            $PROG_ARGS += "-Xverbosegclog:$JBOSS_LOG_DIR\gc.log"
         }elseif ($MODULAR_JDK -eq $true)
         {
-            $PROG_ARGS += "-Xlog:gc*:file=`\`"$JBOSS_LOG_DIR\gc.log`\`":time,uptimemillis:filecount=5,filesize=3M"
+            $PROG_ARGS += "-Xlog:gc*:file=`"`"`"$JBOSS_LOG_DIR\gc.log`"`"`":time,uptimemillis:filecount=5,filesize=3M"
         } else {
             $PROG_ARGS += "-verbose:gc"
             $PROG_ARGS += "-XX:+PrintGCDetails"

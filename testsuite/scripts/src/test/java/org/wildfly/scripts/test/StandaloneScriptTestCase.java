@@ -100,13 +100,6 @@ public class StandaloneScriptTestCase extends ScriptTestCase {
 
     @Override
     void testScript(final ScriptProcess script) throws InterruptedException, TimeoutException, IOException {
-        // This is an odd case for Windows where with the -Xlog:gc* where the file argument does not seem to work with
-        // a directory that contains a space. It seems similar to https://bugs.openjdk.java.net/browse/JDK-8215398
-        // however the workaround is to do something like file=`\`"C:\wildfly\standalong\logs\gc.log`\`". This does not
-        // seem to work when a directory has a space. An error indicating the trailing quote cannot be found. Removing
-        // the `\ parts and just keeping quotes ends in the error shown in JDK-8215398.
-        Assume.assumeFalse(TestSuiteEnvironment.isWindows() && env.containsKey("GC_LOG") && script.getScript().toString().contains(" "));
-
         // Test WFCORE-5917 by adding the jboss.server.base.dir argument
         // Due to WFCORE-6684, skip this verification if there are whitespaces in the home directory
         if (!script.getContainerHome().toString().contains(" ")) {
