@@ -243,6 +243,9 @@ final class MavenSettings {
                                         activeByDefault = Boolean.parseBoolean(reader.getElementText());
                                         break;
                                     }
+                                    default: {
+                                        skip(reader);
+                                    }
                                 }
                             } else {
                                 break;
