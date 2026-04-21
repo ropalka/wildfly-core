@@ -428,6 +428,11 @@ class ElytronDefinition extends SimpleResourceDefinition {
         protected void populateModel(OperationContext context, ModelNode operation, Resource resource) throws OperationFailedException {
             Version.getVersion();
             super.populateModel(context, operation, resource);
+        }
+
+        @Override
+        protected void recordCapabilitiesAndRequirements(OperationContext context, ModelNode operation, Resource resource) throws OperationFailedException {
+            super.recordCapabilitiesAndRequirements(context, operation, resource);
 
             if (AuthorizationRegistration.supportsSelfRegistration()) {
                 context.registerCapability(JAKARTA_AUTHORIZATION_RUNTIME_CAPABILITY);
@@ -555,6 +560,15 @@ class ElytronDefinition extends SimpleResourceDefinition {
     private static class ElytronRemove extends ElytronRemoveStepHandler {
 
         private ElytronRemove() {
+        }
+
+        @Override
+        protected void recordCapabilitiesAndRequirements(OperationContext context, ModelNode operation, Resource resource) throws OperationFailedException {
+            super.recordCapabilitiesAndRequirements(context, operation, resource);
+
+            if (AuthorizationRegistration.supportsSelfRegistration()) {
+                context.deregisterCapability(JAKARTA_AUTHORIZATION_RUNTIME_CAPABILITY.getName());
+            }
         }
 
         @Override
