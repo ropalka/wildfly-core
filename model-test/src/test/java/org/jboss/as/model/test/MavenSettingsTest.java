@@ -113,6 +113,33 @@ public class MavenSettingsTest {
         Assert.assertFalse(settings.getServers().containsKey("non-authenticated-repo"));
     }
 
+    @Test
+    public void testActivationTypes() throws Exception {
+        MavenSettings settings = new MavenSettings();
+        MavenSettings.parseSettingsXml(Paths.get(MavenSettingsTest.class.getResource("settings-with-various-activations.xml").toURI()), settings);
+        settings.resolveActiveSettings();
+
+        List<String> repoIds = settings.getRemoteRepositories().stream()
+                .map(MavenSettings.Repository::getId)
+                .toList();
+
+        // Only profiles with activeByDefault=true should be activated
+        Assert.assertTrue("active-repo should be present (activeByDefault=true)", repoIds.contains("active-repo"));
+        Assert.assertTrue("mixed-repo should be present (activeByDefault=true)", repoIds.contains("mixed-repo"));
+
+        // Profiles with other activation types should NOT be activated
+        Assert.assertFalse("property-repo should not be present (property activation)", repoIds.contains("property-repo"));
+        Assert.assertFalse("jdk-repo should not be present (jdk activation)", repoIds.contains("jdk-repo"));
+        Assert.assertFalse("os-repo should not be present (os activation)", repoIds.contains("os-repo"));
+        Assert.assertFalse("file-repo should not be present (file activation)", repoIds.contains("file-repo"));
+        Assert.assertFalse("not-active-repo should not be present (activeByDefault=false)", repoIds.contains("not-active-repo"));
+        Assert.assertFalse("property-name-repo should not be present (property name only)", repoIds.contains("property-name-repo"));
+        Assert.assertFalse("file-missing-repo should not be present (file missing activation)", repoIds.contains("file-missing-repo"));
+
+        // central should always be present (default)
+        Assert.assertTrue("central should always be present", repoIds.contains("central"));
+    }
+
     /**
      * testing is snapshot resolving works properly, as in case of snapshot version, we need to use different path than exact version.
      * @throws Exception
