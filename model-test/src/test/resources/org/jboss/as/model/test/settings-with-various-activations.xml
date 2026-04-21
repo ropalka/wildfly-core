@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright The WildFly Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <profiles>
+        <!-- Profile with property activation - should NOT activate -->
+        <profile>
+            <id>property-activated</id>
+            <activation>
+                <property>
+                    <name>quickstart</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>property-repo</id>
+                    <url>https://example.org/property-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with jdk activation - should NOT activate -->
+        <profile>
+            <id>jdk-activated</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>jdk-repo</id>
+                    <url>https://example.org/jdk-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with os activation - should NOT activate -->
+        <profile>
+            <id>os-activated</id>
+            <activation>
+                <os>
+                    <name>Linux</name>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                    <version>5.0</version>
+                </os>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>os-repo</id>
+                    <url>https://example.org/os-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with file activation - should NOT activate -->
+        <profile>
+            <id>file-activated</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/pom.xml</exists>
+                </file>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>file-repo</id>
+                    <url>https://example.org/file-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with activeByDefault=true - SHOULD activate -->
+        <profile>
+            <id>active-by-default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>active-repo</id>
+                    <url>https://example.org/active-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with activeByDefault=false - should NOT activate -->
+        <profile>
+            <id>not-active-by-default</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>not-active-repo</id>
+                    <url>https://example.org/not-active-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with mixed activation (property + activeByDefault) - SHOULD activate -->
+        <profile>
+            <id>mixed-activation</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>env</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>mixed-repo</id>
+                    <url>https://example.org/mixed-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with property activation (name only) - should NOT activate -->
+        <profile>
+            <id>property-name-only</id>
+            <activation>
+                <property>
+                    <name>someProperty</name>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>property-name-repo</id>
+                    <url>https://example.org/property-name-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+
+        <!-- Profile with file missing activation - should NOT activate -->
+        <profile>
+            <id>file-missing-activated</id>
+            <activation>
+                <file>
+                    <missing>${basedir}/non-existent-file.txt</missing>
+                </file>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>file-missing-repo</id>
+                    <url>https://example.org/file-missing-repo/</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+</settings>
