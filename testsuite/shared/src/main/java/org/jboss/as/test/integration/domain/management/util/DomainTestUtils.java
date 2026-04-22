@@ -34,6 +34,7 @@ import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.Operation;
 import org.jboss.as.test.integration.management.util.MgmtOperationException;
+import org.jboss.as.test.shared.TimeoutUtil;
 import org.jboss.dmr.ModelNode;
 import org.junit.Assert;
 
@@ -42,8 +43,8 @@ import org.junit.Assert;
  */
 public class DomainTestUtils {
 
-    private static final int DEFAULT_TIMEOUT = 60;
-    private static final int SLEEP_TIME_MILLIS = 100;
+    private static final int DEFAULT_TIMEOUT = TimeoutUtil.adjust(60);
+    private static final int SLEEP_TIME_MILLIS = TimeoutUtil.adjust(100);
 
     private DomainTestUtils() {
         //
@@ -64,7 +65,7 @@ public class DomainTestUtils {
     /**
      * Get the address for a running server.
      *
-     * @param hostName the host name
+     * @param hostName   the host name
      * @param serverName the server name
      * @return the address
      */
@@ -77,7 +78,7 @@ public class DomainTestUtils {
     /**
      * Get the address for a server config.
      *
-     * @param hostName the host name
+     * @param hostName   the host name
      * @param serverName the server name
      * @return the address
      */
@@ -97,7 +98,7 @@ public class DomainTestUtils {
         composite.get(OP).set(COMPOSITE);
         composite.get(OP_ADDR).setEmptyList();
         composite.get(STEPS).setEmptyList();
-        for(final ModelNode step : steps) {
+        for (final ModelNode step : steps) {
             composite.get(STEPS).add(step);
         }
         return composite;
@@ -107,20 +108,20 @@ public class DomainTestUtils {
      * Execute multiple steps and check the result.
      *
      * @param client the controller client
-     * @param steps the individual steps
+     * @param steps  the individual steps
      * @return the operation result
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the operation failed
      */
     public static List<ModelNode> executeStepsForResult(final ModelControllerClient client, final ModelNode... steps) throws IOException, MgmtOperationException {
         final ModelNode operationResult = executeForResult(createCompositeOperation(steps), client);
-        if(! operationResult.hasDefined(RESULT)) {
+        if (!operationResult.hasDefined(RESULT)) {
             return Collections.singletonList(operationResult);
         }
         final List<ModelNode> result = new ArrayList<ModelNode>();
         final int size = operationResult.get(RESULT).asPropertyList().size();
-        for(int i = 0; i < size; i++) {
-            result.add(operationResult.get(RESULT).require("steps-" + (i+1)));
+        for (int i = 0; i < size; i++) {
+            result.add(operationResult.get(RESULT).require("steps-" + (i + 1)));
         }
         return result;
     }
@@ -128,39 +129,39 @@ public class DomainTestUtils {
     /**
      * Execute for a successful result.
      *
-     * @param op the operation to execute
+     * @param op                    the operation to execute
      * @param modelControllerClient the controller client
      * @return the result
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the operation failed
      */
     public static ModelNode executeForResult(final ModelNode op, final ModelControllerClient modelControllerClient) throws IOException, MgmtOperationException {
-       final ModelNode ret = modelControllerClient.execute(op);
+        final ModelNode ret = modelControllerClient.execute(op);
 
-       if (! SUCCESS.equals(ret.get(OUTCOME).asString())) {
-           System.out.println("Failed operation:");
-           System.out.println(op);
-           System.out.println("Response:");
-           System.out.println(ret);
-           throw new MgmtOperationException("Management operation failed.", op, ret);
-       }
-       return ret.get(RESULT);
+        if (!SUCCESS.equals(ret.get(OUTCOME).asString())) {
+            System.out.println("Failed operation:");
+            System.out.println(op);
+            System.out.println("Response:");
+            System.out.println(ret);
+            throw new MgmtOperationException("Management operation failed.", op, ret);
+        }
+        return ret.get(RESULT);
     }
 
 
     /**
      * Execute for a successful result.
      *
-     * @param op the operation to execute
+     * @param op                    the operation to execute
      * @param modelControllerClient the controller client
      * @return the result
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the operation failed
      */
     public static ModelNode executeForResult(final Operation op, final ModelControllerClient modelControllerClient) throws IOException, MgmtOperationException {
         final ModelNode ret = modelControllerClient.execute(op);
 
-        if (! SUCCESS.equals(ret.get(OUTCOME).asString())) {
+        if (!SUCCESS.equals(ret.get(OUTCOME).asString())) {
             System.out.println("Failed operation:");
             System.out.println(op.getOperation());
             System.out.println("Response:");
@@ -173,16 +174,16 @@ public class DomainTestUtils {
     /**
      * Execute for a failed outcome.
      *
-     * @param op the operation to execute
+     * @param op                    the operation to execute
      * @param modelControllerClient the controller client
      * @return the failure description
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the operation did not fail
      */
     public static ModelNode executeForFailure(final ModelNode op, final ModelControllerClient modelControllerClient) throws IOException, MgmtOperationException {
         final ModelNode ret = modelControllerClient.execute(op);
 
-        if (! FAILED.equals(ret.get(OUTCOME).asString())) {
+        if (!FAILED.equals(ret.get(OUTCOME).asString())) {
             System.out.println(ret);
             throw new MgmtOperationException("Management operation succeeded.", op, ret);
         }
@@ -192,16 +193,16 @@ public class DomainTestUtils {
     /**
      * Execute for a failed outcome.
      *
-     * @param op the operation to execute
+     * @param op                    the operation to execute
      * @param modelControllerClient the controller client
      * @return the failure description
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the operation did not fail
      */
     public static ModelNode executeForFailure(final Operation op, final ModelControllerClient modelControllerClient) throws IOException, MgmtOperationException {
         final ModelNode ret = modelControllerClient.execute(op);
 
-        if (! FAILED.equals(ret.get(OUTCOME).asString())) {
+        if (!FAILED.equals(ret.get(OUTCOME).asString())) {
             System.out.println(ret);
             throw new MgmtOperationException("Management operation succeeded.", op.getOperation(), ret);
         }
@@ -211,11 +212,11 @@ public class DomainTestUtils {
     /**
      * Wait until a server reached a given state or fail if the timeout was reached.
      *
-     * @param client the controller client
-     * @param hostName the host name
+     * @param client     the controller client
+     * @param hostName   the host name
      * @param serverName the server name
-     * @param state the required state
-     * @throws IOException
+     * @param state      the required state
+     * @throws IOException if an I/O error occurs while executing the operation
      */
     public static void waitUntilState(final ModelControllerClient client, final String hostName, final String serverName, final String state) throws IOException {
         waitUntilState(client, getServerConfigAddress(hostName, serverName), state);
@@ -224,13 +225,25 @@ public class DomainTestUtils {
     /**
      * Wait until a server reached a given state or fail if the timeout was reached.
      *
-     * @param client the controller client
+     * @param client        the controller client
      * @param serverAddress the server address
-     * @param state the required state
-     * @throws IOException
+     * @param state         the required state
+     * @throws IOException if an I/O error occurs while executing the operation
      */
     public static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String state) throws IOException {
         waitUntilState(client, serverAddress, state, DEFAULT_TIMEOUT, TimeUnit.SECONDS, "status");
+    }
+
+    /**
+     * Wait until a server reached a given state or fail if the timeout was reached.
+     *
+     * @param client        the controller client
+     * @param serverAddress the server address
+     * @param state         the required state
+     * @throws IOException if an I/O error occurs while executing the operation
+     */
+    public static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String state, int timeout, TimeUnit timeoutUnit) throws IOException {
+        waitUntilState(client, serverAddress, state, timeout, timeoutUnit, "status");
     }
 
     /**
@@ -239,7 +252,7 @@ public class DomainTestUtils {
      * @param client        the controller client
      * @param serverAddress the server address
      * @param state         the required state
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while executing the operation
      */
     public static void waitUntilSuspendState(final ModelControllerClient client, final PathAddress serverAddress, final String state) throws IOException {
         waitUntilState(client, serverAddress, state, DEFAULT_TIMEOUT, TimeUnit.SECONDS, "suspend-state");
@@ -249,10 +262,10 @@ public class DomainTestUtils {
      * Check if a path address exists.
      *
      * @param address the child address
-     * @param client the controller client
+     * @param client  the controller client
      * @return whether the child exists or not
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if an unexpected management operation error occurs
      */
     public static boolean exists(ModelNode address, ModelControllerClient client) throws IOException, MgmtOperationException {
         return exists(PathAddress.pathAddress(address), client);
@@ -262,18 +275,18 @@ public class DomainTestUtils {
      * Check if a path address exists.
      *
      * @param address the path address
-     * @param client the controller client
+     * @param client  the controller client
      * @return whether the child exists or not
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if an unexpected management operation error occurs
      */
     public static boolean exists(PathAddress address, ModelControllerClient client) throws IOException, MgmtOperationException {
         final PathElement element = address.getLastElement();
-        final PathAddress subAddress = address.subAddress(0, address.size() -1);
+        final PathAddress subAddress = address.subAddress(0, address.size() - 1);
         final boolean checkType = element.isWildcard();
         final ModelNode e;
         final ModelNode operation;
-        if(checkType) {
+        if (checkType) {
             e = new ModelNode().set(element.getKey());
             operation = createOperation(READ_CHILDREN_TYPES_OPERATION, subAddress);
         } else {
@@ -285,9 +298,9 @@ public class DomainTestUtils {
             final ModelNode result = executeForResult(operation, client);
             return result.asList().contains(e);
         } catch (MgmtOperationException ex) {
-            if(! checkType) {
+            if (!checkType) {
                 final String failureDescription = ex.getResult().get(FAILURE_DESCRIPTION).asString();
-                if(failureDescription.contains("WFLYCTL0202") && failureDescription.contains(element.getKey())) {
+                if (failureDescription.contains("WFLYCTL0202") && failureDescription.contains(element.getKey())) {
                     return false;
                 }
             }
@@ -299,11 +312,11 @@ public class DomainTestUtils {
      * Start a managed server.
      *
      * @param connection the mgmt connection
-     * @param host the host name
-     * @param server the server name
+     * @param host       the host name
+     * @param server     the server name
      * @return the server state
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the start operation fails
      */
     public static String startServer(final ModelControllerClient connection, final String host, final String server) throws IOException, MgmtOperationException {
         return startServer(connection, host, server, true);
@@ -313,12 +326,12 @@ public class DomainTestUtils {
      * Start a managed server.
      *
      * @param connection the mgmt connection
-     * @param host the host name
-     * @param server the server name
-     * @param blocking whether to block until the server is started
+     * @param host       the host name
+     * @param server     the server name
+     * @param blocking   whether to block until the server is started
      * @return the server state
-     * @throws IOException
-     * @throws MgmtOperationException
+     * @throws IOException            if an I/O error occurs while executing the operation
+     * @throws MgmtOperationException if the start operation fails
      */
     public static String startServer(final ModelControllerClient connection, final String host, final String server, final boolean blocking) throws IOException, MgmtOperationException {
         final PathAddress address = getServerConfigAddress(host, server);
@@ -328,25 +341,25 @@ public class DomainTestUtils {
         operation.get("blocking").set(blocking);
         // Start
         executeForResult(operation, connection);
-        // Check the starte
+        // Check the start
         return getServerState(connection, address);
     }
 
     /**
      * Wait until a server reached a given state or fail if the timeout was reached.
      *
-     * @param client the controller client
+     * @param client        the controller client
      * @param serverAddress the server address
-     * @param required the required state
-     * @param timeout the timeout
-     * @param unit the time unit
-     * @throws IOException
+     * @param required      the required state
+     * @param timeout       the timeout
+     * @param unit          the time unit
+     * @throws IOException if an I/O error occurs while executing the operation
      */
-    private static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String required, final long timeout, final TimeUnit unit, final String attrName) throws IOException {
+    public static void waitUntilState(final ModelControllerClient client, final PathAddress serverAddress, final String required, final long timeout, final TimeUnit unit, final String attrName) throws IOException {
         final long deadline = System.currentTimeMillis() + unit.toMillis(timeout);
-        for(;;) {
+        for (; ; ) {
             final long remaining = deadline - System.currentTimeMillis();
-            if(remaining <= 0) {
+            if (remaining <= 0) {
                 break;
             }
             if (getState(client, serverAddress, attrName).equals(required)) {
@@ -354,9 +367,9 @@ public class DomainTestUtils {
             }
             try {
                 TimeUnit.MILLISECONDS.sleep(SLEEP_TIME_MILLIS);
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
+                break;
             }
         }
         final String state = getState(client, serverAddress, attrName);
@@ -366,10 +379,10 @@ public class DomainTestUtils {
     /**
      * Get the state for a given server.
      *
-     * @param client the controller client
+     * @param client        the controller client
      * @param serverAddress the server config address
      * @return the server state
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while executing the operation
      */
     public static String getServerState(final ModelControllerClient client, final PathAddress serverAddress) throws IOException {
         return getState(client, serverAddress, "status");
@@ -378,17 +391,24 @@ public class DomainTestUtils {
     /**
      * Check the state of server.
      *
-     * @param client the controller client
+     * @param client        the controller client
      * @param serverAddress the server config address
-     * @param state the expected state
+     * @param state         the expected state
      * @return {@code true} if the state matches, {@code false} otherwise
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while executing the operation
      */
     public static boolean checkServerState(final ModelControllerClient client, final PathAddress serverAddress, final String state) throws IOException {
         final String serverState = getServerState(client, serverAddress);
         return state.equals(serverState);
     }
 
+    /**
+     * Create a management operation.
+     *
+     * @param op      the operation name
+     * @param address the address as a model node
+     * @return the operation
+     */
     public static ModelNode createOperation(String op, ModelNode address) {
         final ModelNode operation = new ModelNode();
         operation.get(OP).set(op);
@@ -396,10 +416,26 @@ public class DomainTestUtils {
         return operation;
     }
 
+    /**
+     * Create a management operation.
+     *
+     * @param op      the operation name
+     * @param address the address as a path address
+     * @return the operation
+     */
     public static ModelNode createOperation(String op, PathAddress address) {
         return createOperation(op, address.toModelNode());
     }
 
+    /**
+     * Read a named attribute from a server address.
+     *
+     * @param client        the controller client
+     * @param serverAddress the server address
+     * @param attrName      the attribute name to read
+     * @return the attribute value as a string
+     * @throws IOException if an I/O error occurs while executing the operation
+     */
     private static String getState(final ModelControllerClient client, final PathAddress serverAddress, final String attrName) throws IOException {
         final ModelNode operation = new ModelNode();
         operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
