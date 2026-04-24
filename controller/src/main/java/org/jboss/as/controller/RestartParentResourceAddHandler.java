@@ -100,7 +100,7 @@ public abstract class RestartParentResourceAddHandler extends RestartParentResou
 
     /**
      * Populate the given resource in the persistent configuration model based on the values in the given operation.
-     * This method isinvoked during {@link org.jboss.as.controller.OperationContext.Stage#MODEL}.
+     * This method is invoked during {@link org.jboss.as.controller.OperationContext.Stage#MODEL}.
      * <p>
      * This default implementation simply calls {@link #populateModel(ModelNode, org.jboss.dmr.ModelNode)}.
      *
