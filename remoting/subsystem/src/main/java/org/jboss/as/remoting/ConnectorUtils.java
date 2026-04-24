@@ -131,7 +131,10 @@ public class ConnectorUtils {
             List<Property> props = property.asPropertyList();
             List<org.xnio.Property> converted = new ArrayList<org.xnio.Property>(props.size());
             for (Property current : props) {
-                converted.add(org.xnio.Property.of(current.getName(), PropertyResource.VALUE.resolveModelAttribute(context, current.getValue()).asString()));
+                ModelNode valueNode = PropertyResource.VALUE.resolveModelAttribute(context, current.getValue());
+                if (valueNode.isDefined()) {
+                    converted.add(org.xnio.Property.of(current.getName(), valueNode.asString()));
+                }
             }
             builder.set(Options.SASL_PROPERTIES, Sequence.of(converted));
         }
@@ -141,8 +144,11 @@ public class ConnectorUtils {
         final ClassLoader loader = WildFlySecurityManager.getClassLoaderPrivileged(ConnectorUtils.class);
         for (Property property : properties.asPropertyList()) {
             final Option option = getAndValidateOption(loader, property.getName());
-            String value = PropertyResource.VALUE.resolveModelAttribute(context, property.getValue()).asString();
-            builder.set(option, option.parseValue(value, loader));
+            ModelNode valueNode = PropertyResource.VALUE.resolveModelAttribute(context, property.getValue());
+            if (valueNode.isDefined()) {
+                String value = valueNode.asString();
+                builder.set(option, option.parseValue(value, loader));
+            }
         }
     }
 
