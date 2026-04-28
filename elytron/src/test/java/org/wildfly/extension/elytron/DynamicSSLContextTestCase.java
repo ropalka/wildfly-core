@@ -29,14 +29,14 @@ public class DynamicSSLContextTestCase extends AbstractSubsystemTest {
     private static final String ELYTRON = "elytron";
 
     public DynamicSSLContextTestCase() {
-        super(ElytronExtension.SUBSYSTEM_NAME, new ElytronExtension(), Stability.COMMUNITY);
+        super(ElytronExtension.SUBSYSTEM_NAME, new ElytronExtension(), Stability.DEFAULT);
     }
 
     private static KernelServices services = null;
 
     @Before
     public void initServices() throws Exception {
-        TestEnvironment testEnvironment = new TestEnvironment(Stability.COMMUNITY);
+        TestEnvironment testEnvironment = new TestEnvironment(Stability.DEFAULT);
         services = super.createKernelServicesBuilder(testEnvironment).setSubsystemXmlResource("authentication-client.xml").build();
         if (!services.isSuccessfulBoot()) {
             if (services.getBootError() != null) {
