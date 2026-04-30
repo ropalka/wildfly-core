@@ -272,14 +272,24 @@ if not "%PRESERVE_JAVA_OPTS%" == "true" (
             "!JAVA!" -Xverbosegclog:"!JBOSS_LOG_DIR!\gc.log" -version >nul 2>&1 && (set OPEN_J9_JDK=true) || (set OPEN_J9_JDK=false)
             if "!OPEN_J9_JDK!" == "true" (
                 set TMP_PARAM=-Xverbosegclog:"!JBOSS_LOG_DIR!\gc.log"
+                "!JAVA!" !TMP_PARAM! -version > nul 2>&1
+                if not errorlevel == 1 (
+                   set "GC_OPTS=!TMP_PARAM!"
+                ) else (
+                   set "GC_OPTS="
+                )
             ) else if "!MODULAR_JDK!" == "true" (
                 set TMP_PARAM=-Xlog:gc*:file="\"!JBOSS_LOG_DIR!\gc.log\"":time,uptimemillis:filecount=5,filesize=3M
+                "!JAVA!" !TMP_PARAM! -version > nul 2>&1
+                if not errorlevel == 1 (
+                   set "JAVA_OPTS=!JAVA_OPTS! !TMP_PARAM!"
+                )
             ) else (
                 set TMP_PARAM=-verbose:gc -Xloggc:"!JBOSS_LOG_DIR!\gc.log" -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=3M -XX:-TraceClassUnloading
-            )
-            "!JAVA!" !TMP_PARAM! -version > nul 2>&1
-            if not errorlevel == 1 (
-               set "JAVA_OPTS=!JAVA_OPTS! !TMP_PARAM!"
+                "!JAVA!" !TMP_PARAM! -version > nul 2>&1
+                if not errorlevel == 1 (
+                   set "JAVA_OPTS=!JAVA_OPTS! !TMP_PARAM!"
+                )
             )
             rem Remove the gc.log file from the -version check
             del /F /Q "%JBOSS_LOG_DIR%\gc.log" > nul 2>&1
@@ -331,7 +341,7 @@ echo ===========================================================================
 echo.
 
 :RESTART
-  "%JAVA%" %JAVA_OPTS% ^
+  "%JAVA%" %JAVA_OPTS% %GC_OPTS% ^
    "-Dorg.jboss.boot.log.file=%JBOSS_LOG_DIR%\server.log" ^
    "-Dlogging.configuration=file:%JBOSS_CONFIG_DIR%/logging.properties" ^
       -jar "%JBOSS_HOME%\jboss-modules.jar" ^
